@@ -596,7 +596,6 @@ void Trainer<T>::train(int min_n_feat, int max_n_feat, uint64_t feat_type, int m
 {
 
 	if (k != 0) {
-		std::cout << "Splitting data" << endl;
 		uintmax_t _id = points.size();
 		Predictor<T> pred(k, cutoff, PRED_MODE_CLASS, feat_type,
 				  mut_type, min_n_feat, max_n_feat, min_id);

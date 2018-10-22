@@ -49,6 +49,8 @@ Usage: bin/meshclust2 --id 0.x [OPTIONS] *.fasta
 --threads sets the number of threads to be used. By default OpenMP uses the number of available cores
 	  on your machine, but this parameter overwrites that.
 
+--quiet  (no arguments) removes the progress bars from output
+
 --output specifies the output file, in CD-HIT's CLSTR format, described below:
 	 A '>Cluster ' followed by an increasing index designates a cluster.
 	 Otherwise, the sequence is printed out.

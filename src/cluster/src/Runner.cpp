@@ -222,6 +222,8 @@ void Runner::get_opts(int argc, char **argv)
 			}
 
 			i++;
+		} else if (arg == "-q" || arg == "--quiet") {
+			Progress::set_quiet(true);
 		} else if ((arg == "-t" || arg == "--threads") && i + 1 < argc) {
 			try {
 				std::string opt = argv[i+1];
