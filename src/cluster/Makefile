@@ -1,5 +1,5 @@
 TARGET ?= meshclust2
-VERSION ?= 2.0.0
+VERSION ?= 2.1.0
 CXX ?= g++
 ifeq ($(debug),yes)
 	CXXFLAGS += -ggdb -DDEBUG -fno-omit-frame-pointer -fopenmp

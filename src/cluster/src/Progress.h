@@ -10,8 +10,6 @@
 
 class Progress {
 public:
-	static void set_quiet(bool is_quiet_=true);
-	static bool is_quiet;
 	Progress(long num, std::string prefix_);
 	~Progress() { end(); }
 	void end();

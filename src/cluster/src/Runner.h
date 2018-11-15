@@ -34,7 +34,7 @@ private:
 	int min_n_feat = 3;
 	int max_n_feat = 5;
 	int mut_type = HandleSeq::SINGLE;
-	uint64_t feat_type = PRED_FEAT_FAST;
+	uint64_t feat_type = PRED_FEAT_FAST | PRED_FEAT_DIV;
 	double min_id = 0.35;
 	std::vector<std::string> files;
 	string output = "output.clstr";

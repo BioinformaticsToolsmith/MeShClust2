@@ -332,7 +332,7 @@ void mean_shift_update(vector<Center<T> > &part, int j, const Trainer<T>& trn, i
 			cerr << "mean shift: NULL" << endl;
 		}
 	} else {
-		cout << "GOOD: EMPTY" << endl;
+		//cout << "GOOD: EMPTY" << endl;
 	}
 	delete top;
 	delete temp;

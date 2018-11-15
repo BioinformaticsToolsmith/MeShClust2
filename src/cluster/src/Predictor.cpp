@@ -356,16 +356,16 @@ void Predictor<T>::train(const vector<Point<T> *> &points, const vector<Point<T>
 		size_t counter = 0;
 		// struct timespec start, stop;
 		// clock_gettime(CLOCK_MONOTONIC, &start);
-		Progress prog(f_points_tr.size(), "Generating training data");
+		Progress prog1(f_points_tr.size(), "Generating training");
 		#pragma omp parallel for
 		for (size_t i = 0; i < f_points_tr.size(); i++) {
 			auto p = f_points_tr[i];
 			mutate_seqs(p, 5, pos_buf, neg_buf, 100 * id, 100, _id);
 			mutate_seqs(p, 5, pos_buf, neg_buf, min_id, 100 * id, _id);
 			#pragma omp critical
-			prog++;
+			prog1++;
 		}
-		prog.end();
+		prog1.end();
 		// clock_gettime(CLOCK_MONOTONIC, &stop);
 		// printf("took %lu\n", stop.tv_sec - start.tv_sec);
 
@@ -389,7 +389,7 @@ void Predictor<T>::train(const vector<Point<T> *> &points, const vector<Point<T>
 		}
 		pos_buf.clear();
 		neg_buf.clear();
-		Progress prog2(f_points_test.size(), "Generating test data");
+		Progress prog2(f_points_test.size(), "Generating testing");
 		#pragma omp parallel for
 		for (size_t i = 0; i < f_points_test.size(); i++) {
 			auto p = f_points_test[i];
@@ -743,7 +743,7 @@ void Predictor<T>::train_class(Feature<T>* feat)
 			feat->finalize();
 			abs_best_acc = best_class_acc;
 			used_list.push_back(best_idx);
-//			oss << "Feature added: " << best_class_feat.first << " " << (int)best_class_feat.second << endl;
+			oss << "Feature added: " << best_class_feat.first << " " << (int)best_class_feat.second << endl;
 			oss << "Accuracy: " << best_class_acc << endl;
 			possible_feats.erase(std::remove(possible_feats.begin(), possible_feats.end(), best_class_feat), possible_feats.end());
 		}

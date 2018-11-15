@@ -8,68 +8,71 @@ CXX=g++-7 make
 
 see: https://stackoverflow.com/questions/29057437/compile-openmp-programs-with-gcc-compiler-on-os-x-yosemite
 
-
 Linux/Unix compilation:
 make
 
+
+If you find this tool helpful, please cite:
+
+James, Benjamin T. et al. (2018), MeShClust2: Application of alignment-free identity scores in clustering long DNA sequences. bioRxiv, 451278.
+
+
 Usage: bin/meshclust2 --id 0.x [OPTIONS] *.fasta
 
---id  The most important parameter, --id, controls the identity cutoff of the sequences.
-      Needs to be between 0 and 1.
-      If it is not specified, an identity of 0.9 is used.
+--id          The most important parameter, --id, controls the identity cutoff of the sequences.
+              Needs to be between 0 and 1.
+              If it is not specified, an identity of 0.9 is used.
 
---kmer decides the size of the kmers. It is by default automatically decided by average sequence length,
-       but if provided, MeShClust can speed up a little by not having to find the largest sequence length.
-       Increasing kmer size can increase accuracy, but increases memory consumption.
+--kmer        decides the size of the kmers. It is by default automatically decided by average sequence
+              length, but if provided, MeShClust can speed up a little by not having to find the largest
+              sequence length. Increasing kmer size can increase accuracy, but increases memory consumption.
 
---mut-type {single, both, nonsingle-typical, nonsingle-all, all-but-reversion, all-but-translocation}
-	   changes the mutation generation algorithm. By default, "single" is used, utilizing only
-	   single point mutations. On low identity data sets, "both", which includes single mutations
-	   and block mutations, is preferable. The option "nonsingle-typical" uses only block mutations,
-	   disallowing single point mutations. Other options include "all", which includes single,
-	   block, and nontypical mutations translocation and reversion.
+--mut-type   {single, both, nonsingle-typical, nonsingle-all, all-but-reversion, all-but-translocation}
+             changes the mutation generation algorithm. By default, "single" is used, utilizing only
+             single point mutations. On low identity data sets, "both", which includes single mutations
+             and block mutations, is preferable. The option "nonsingle-typical" uses only block mutations,
+             disallowing single point mutations. Other options include "all", which includes single,
+             block, and nontypical mutations translocation and reversion.
 
---feat    determines the combinations of features to be used. By default, "fast" allows 9 fast combinations
-	  to be selected from. "slow" adds 2 slower features which include logarithm based features,
-	  and "extraslow" includes 33 total features used in a previous study.
+--feat       determines the combinations of features to be used. By default, "slow" allows 11
+             combinations to be selected from. "fast" removes 2 slower features from "slow"
+             which include logarithm based features, and "extraslow" includes 33 total features
+             used in a previous study.
 
---min-feat (default 3) sets the minimum feature pairs to be used. If set to 2, at least 2 feature pairs
-	   will be used. Recall that features include pairwise combinations of the "feat" option.
+--min-feat   (default 3) sets the minimum feature pairs to be used. If set to 2, at least 2 feature pairs
+             will be used. Recall that features include pairwise combinations of the "feat" option.
 
---max-feat (default 5) sets the maximum feature pairs to be used. Diminishing returns appears quickly,
-	   so a very large maximum is not advised.
+--max-feat   (default 5) sets the maximum feature pairs to be used. Diminishing returns appears quickly,
+             so a very large maximum is not advised.
 
---sample selects the total number of sequences used for both training and testing.
-	 300 is the default value. Each sequence generates 10 synthetic mutants.
-	 That is, --sample 300 provides 3000 training pairs and 3000 testing pairs.
+--sample     selects the total number of sequences used for both training and testing.
+             300 is the default value. Each sequence generates 10 synthetic mutants.
+             That is, --sample 300 provides 3000 training pairs and 3000 testing pairs.
 
---min-id  (default 0.35) sets the lower bound for mutation identity scores to be calculated. Shouldn't need
-	  to be set normally, as lower identites take much longer, especially with single mutations only.
+--min-id     (default 0.35) sets the lower bound for mutation identity scores to be calculated.
+             Shouldn't need to be set normally, as lower identites take much longer,
+             especially with single mutations only.
 
---threads sets the number of threads to be used. By default OpenMP uses the number of available cores
-	  on your machine, but this parameter overwrites that.
+--threads    sets the number of threads to be used. By default OpenMP uses the number of available cores
+             on your machine, but this parameter overwrites that.
 
---quiet  (no arguments) removes the progress bars from output
+--output     specifies the output file, in CD-HIT's CLSTR format, described below:
+             A '>Cluster ' followed by an increasing index designates a cluster.
+             Otherwise, the sequence is printed out.
+             A '*' at the end of a sequence designates the center of the cluster.
+             An example of a small data set:
+             >Cluster 0
+             0       993nt, >seq128 template_6... *
+             >Cluster 1
+             0       1043nt, >seq235 template_10...
+             1       1000nt, >seq216 template_10... *
+             2       1015nt, >seq237 template_10...
 
---output specifies the output file, in CD-HIT's CLSTR format, described below:
-	 A '>Cluster ' followed by an increasing index designates a cluster.
-	 Otherwise, the sequence is printed out.
-	 A '*' at the end of a sequence designates the center of the cluster.
-	 An example of a small data set:
-
-	 >Cluster 0
-	 0       993nt, >seq128 template_6... *
-	 >Cluster 1
-	 0       1043nt, >seq235 template_10...
-	 1       1000nt, >seq216 template_10... *
-	 2       1015nt, >seq237 template_10...
-
-
---delta decides how many clusters are looked around in the final clustering stage.
-	Increasing it creates more accuracy, but takes more time. Default value is 5.
+--delta      decides how many clusters are looked around in the final clustering stage.
+             Increasing it creates more accuracy, but takes more time. Default value is 5.
 
 --iterations specifies how many iterations in the final stage of merging are done until convergence.
-	     Default value is 15.
+             Default value is 15.
 
 
 

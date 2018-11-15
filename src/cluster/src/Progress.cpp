@@ -2,12 +2,6 @@
 #include <iostream>
 #include <sstream>
 
-bool Progress::is_quiet = false;
-
-void Progress::set_quiet(bool is_quiet_)
-{
-	is_quiet = is_quiet_;
-}
 Progress::Progress(long num, std::string prefix_)
 {
 	pmax = num;
@@ -21,9 +15,6 @@ Progress::Progress(long num, std::string prefix_)
 
 void Progress::print()
 {
-	if (is_quiet) {
-		return;
-	}
 	std::ostringstream oss;
 	double prog = (double)pcur / pmax;
 	oss << prefix << " [";
