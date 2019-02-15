@@ -77,3 +77,9 @@ Usage: bin/meshclust2 --id 0.x [OPTIONS] *.fasta
 
 
 If the argument is not listed here, it is interpreted as an input (FASTA format) file.
+
+
+License
+
+Academic use: The software is provided as-is under the GNU GPLv3.
+Any restrictions to use for-profit or non-academics: License needed.
