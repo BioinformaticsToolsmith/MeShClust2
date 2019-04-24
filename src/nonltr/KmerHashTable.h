@@ -57,6 +57,7 @@ public:
 	void increment(const char*);
 	void increment(const char*, int);
 	void wholesaleIncrement(const char*, int, int);
+	int wholesaleIncrementNoOverflow(const char*, int, int);
 
 	void addReverseComplement();
 	I countNonInitialEntries();

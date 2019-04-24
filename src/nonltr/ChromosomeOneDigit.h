@@ -15,28 +15,28 @@ namespace nonltr {
 class ChromosomeOneDigit: public Chromosome {
 
 private:
-	/* Fields */
-	map<char, char> * codes;
-
-	/* Methods */
+	void encode();
 	void help();
-	void buildCodes();
-	void encodeNucleotides();
 
-	void makeReverse();
-	void makeComplement();
-	void reverseSegments();
+
+protected:
+	bool canClean = false;
+	map<char, char> * codes;
+	virtual void buildCodes() = 0;
+
 
 public:
 	/* Methods */
 	ChromosomeOneDigit();
+	ChromosomeOneDigit(uint64_t);
 	ChromosomeOneDigit(string);
-	ChromosomeOneDigit(string, string);
+	ChromosomeOneDigit(string, int, int);
+	ChromosomeOneDigit(string&, string&);
+	ChromosomeOneDigit(string&, string&, int);
 	virtual ~ChromosomeOneDigit();
 	virtual void finalize();
 
-	void makeR();
-	void makeRC();
+
 };
 }
 

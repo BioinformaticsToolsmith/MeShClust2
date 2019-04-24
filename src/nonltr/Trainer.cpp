@@ -106,7 +106,7 @@ void Trainer::stage2() {
 		cout << "Calculating the percentage in: " << fileList->at(i) << " ...";
 		cout << endl;
 		ChromListMaker * maker = new ChromListMaker(fileList->at(i));
-		const vector<Chromosome *> * chromList = maker->makeChromOneDigitList();
+		const vector<Chromosome *> * chromList = maker->makeChromOneDigitDnaList();
 
 		for (int h = 0; h < chromList->size(); h++) {
 			ChromosomeOneDigit * chrom =
@@ -190,7 +190,7 @@ void Trainer::stage3() {
 
 		// Read sequences in the file
 		ChromListMaker * maker = new ChromListMaker(fileList->at(i));
-		const vector<Chromosome *> * chromList = maker->makeChromOneDigitList();
+		const vector<Chromosome *> * chromList = maker->makeChromOneDigitDnaList();
 
 		for (int h = 0; h < chromList->size(); h++) {
 			ChromosomeOneDigit * chrom = dynamic_cast<ChromosomeOneDigit *>(chromList->at(h));
@@ -216,7 +216,7 @@ void Trainer::stage3() {
 				}
 				trainingRegionList = detector->getRegionList();
 
-				
+
 			}
 
 			if (isCON && isConRepAvailable) {
@@ -225,7 +225,7 @@ void Trainer::stage3() {
 					locList->mergeWithAnotherList(detector->getRegionList());
 				}
 				trainingRegionList = locList->getList();
-				
+
 			}
 
 			// The candidate regions are already copied to the location list
@@ -236,7 +236,7 @@ void Trainer::stage3() {
 
 			// Train the HMM
 			if(isCND || (isCON && isConRepAvailable)){
-				
+
 				scorer->takeLog(t);
 				scoreList = scorer->getScores();
 				hmm->train(scoreList, chrom->getSegment(), trainingRegionList);

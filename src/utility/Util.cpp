@@ -18,7 +18,13 @@ Util::~Util() {
 
 string Util::fileSeparator("/");
 
-//string * Util::emptyString = new string("");
+string * Util::emptyString = new string("");
+
+bool Util::isDna = true;
+
+const int Util::getAlphabetSize(){
+	return Util::isDna? 4 : 22;
+}
 
 void Util::readFasta(string seqFile, vector<string> * infoList,
 		vector<string> * seqList, bool canCheckFormat) {

@@ -8,6 +8,7 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
+#include <limits>
 
 #include "../utility/Util.h"
 #include "../exception/InvalidInputException.h"
@@ -222,6 +223,38 @@ void KmerHashTable<I, V>::wholesaleIncrement(const char* sequence,
 	}*/
 }
 
+
+/**
+ * Call wholesaleIncrement on the segment itself.
+ * Then, call it again on the reverse complement of this segment.
+ *
+ * sequence: is a long sequence usually a long segment of a chromosome.
+ * sFirstKmer: is the start index of the first k-mer.
+ * sLastKmer: is the start index of the last k-mer.
+ */
+template<class I, class V>
+int  KmerHashTable<I, V>::wholesaleIncrementNoOverflow(const char* sequence,
+		int firstKmerStart, int lastKmerStart) {
+	// Increment k-mer's in the forward strand
+	vector<I> hashList = vector<I>();
+	hash(sequence, firstKmerStart, lastKmerStart, &hashList);
+	int ret = 0;
+	int size = hashList.size();
+	for (int i = 0; i < size; i++) {
+		I keyHash = hashList.at(i);
+		if (keyHash >= maxTableSize) {
+			cerr << "array out of bounds" << endl;
+			throw "";
+		}
+		if (values[keyHash] < std::numeric_limits<V>::max()) {
+			values[keyHash]++;
+		} else {
+			ret = -1;
+		}
+	}
+	return ret;
+}
+
 /**
  * Increment the entry associated with the key by one.
  */
@@ -384,7 +417,7 @@ vector<string>* KmerHashTable<I, V>::getKeys() {
 template<class I, class V>
 void KmerHashTable<I, V>::printTable(string output) {
 	vector<const char *> keys;
-//	getKeys(keys);
+	//getKeys(keys);
 
 	ofstream out(output.c_str());
 

@@ -27,15 +27,20 @@ namespace nonltr {
 class Chromosome: public IChromosome {
 public:
 	Chromosome();
+	Chromosome(uint64_t);
 	Chromosome(string);
 	Chromosome(string, bool);
 	Chromosome(string, int);
+	Chromosome(string, int, int);
 	Chromosome(string &, string&);
 	Chromosome(string &, string&, int);
 
 	int getGcContent();
 
 	virtual ~Chromosome();
+
+	virtual string& getBaseRef();
+	virtual string& getHeaderRef();
 
 	virtual const string* getBase();
 	virtual const vector<vector<int> *> * getSegment();
@@ -47,19 +52,23 @@ public:
 	virtual void setSequence(string&);
 	virtual void appendToSequence(const string&);
 	virtual void finalize();
-
+	virtual vector<int> * getBaseCount();
+	virtual void insert(const string&);
 
 protected:
 	string chromFile;
 	string header;
 	string base;
+	int str_len;
+
 	int effectiveSize;
 	int segLength;
 
 	vector<vector<int> *> * segment;
 	void readFasta();
+	void readFasta(int);
 	void toUpperCase();
-	void removeN();
+	void removeAmbiguous();
 	void mergeSegments();
 	virtual void help(int, bool);
 	void makeSegmentList();
@@ -69,9 +78,11 @@ private:
 	bool isHeaderReady;
 	bool isBaseReady;
 	bool isFinalized;
+	bool canClean = false;
 
 	void reverseSegments();
-
+	void makeBaseCount();
+	vector<int> * baseCount;
 };
 }
 

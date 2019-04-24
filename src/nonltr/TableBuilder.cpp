@@ -31,7 +31,7 @@ void TableBuilder::buildTable() {
 	for (int i = 0; i < fileList->size(); i++) {
 		cout << "Counting k-mers in " << fileList->at(i) << " ..." << endl;
 		ChromListMaker * maker = new ChromListMaker(fileList->at(i));
-		const vector<Chromosome *> * chromList = maker->makeChromOneDigitList();
+		const vector<Chromosome *> * chromList = maker->makeChromOneDigitDnaList();
 
 		for (int h = 0; h < chromList->size(); h++) {
 			ChromosomeOneDigit * chrom =

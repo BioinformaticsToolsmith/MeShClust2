@@ -33,6 +33,7 @@ private:
 public:
 	static string * emptyString;
 	static string fileSeparator;
+	static bool isDna;
 	static void readFasta(string, vector<string> *, vector<string> *, bool);
 	static void readFasta(string, vector<string> *, vector<string> *);
 	static void readCoordinates(string, vector<Location *> *);
@@ -52,6 +53,9 @@ public:
 	static void writeFasta(const string&, const string&, const string&);
 
 	static int sumTotalLength(const vector<ILocation *> *);
+
+	// Added on Oct 6 2018
+	static const int getAlphabetSize();
 
 	/**
 	 * Delete the objects pointed to by pointers in a vector.

@@ -5,6 +5,7 @@
  *      Author: Hani Zakaria Girgis, PhD - NCBI/NLM/NIH
  */
 #include "Chromosome.h"
+#include <string.h>
 
 Chromosome::Chromosome() {
 	header = string("");
@@ -14,6 +15,14 @@ Chromosome::Chromosome() {
 	isFinalized = false;
 }
 
+Chromosome::Chromosome(uint64_t size) {
+	header = string("");
+	base = string(size, ' ');
+	str_len = 0;
+	isHeaderReady = false;
+	isBaseReady = false;
+	isFinalized = false;
+}
 Chromosome::Chromosome(string fileName) {
 	chromFile = fileName;
 	readFasta();
@@ -29,6 +38,12 @@ Chromosome::Chromosome(string fileName, bool canMerge) {
 Chromosome::Chromosome(string fileName, int len) {
 	chromFile = fileName;
 	readFasta();
+	help(len, true);
+}
+
+Chromosome::Chromosome(string fileName, int len, int maxLength) {
+	chromFile = fileName;
+	readFasta(maxLength);
 	help(len, true);
 }
 
@@ -81,6 +96,22 @@ void Chromosome::appendToSequence(const string& line) {
 	}
 }
 
+void Chromosome::insert(const string& line) {
+	if (isFinalized) {
+		string msg("This chromosome has been finalized. ");
+		msg.append("The sequence cannot be modified.");
+		throw InvalidOperationException(msg);
+	} else {
+
+		memcpy((char*)base.c_str() + str_len,
+		       line.c_str(),
+		       line.length());
+		str_len += line.length();
+		isBaseReady = true;
+	}
+}
+
+
 void Chromosome::finalize() {
 	if (isFinalized) {
 		string msg("This chromosome has been already finalized. ");
@@ -97,26 +128,52 @@ void Chromosome::finalize() {
 }
 
 void Chromosome::help(int len, bool canMerge) {
+	canClean = true;
+
 	effectiveSize = 0;
 	segLength = len;
 	segment = new vector<vector<int> *>();
-//	segment->reserve(100);
+	//segment->reserve(100);
 
 	toUpperCase();
-	removeN();
-	if (canMerge) {
+
+	if(Util::isDna){
+		baseCount = new vector<int>(4, 0);
+		makeBaseCount();
+	}
+
+	removeAmbiguous();
+
+	if (Util::isDna && (canMerge && base.size() > 20)) {
 		mergeSegments();
 	}
+
 	makeSegmentList();
 	calculateEffectiveSize();
+
 }
 
 Chromosome::~Chromosome() {
 	base.clear();
 
-	Util::deleteInVector(segment);
-	segment->clear();
-	delete segment;
+	//cerr << "~Chromosome() 1" << endl;
+
+	if (canClean) {
+		while (!segment->empty()) {
+			segment->back()->clear();
+			delete segment->back();
+			segment->pop_back();
+		}
+		segment->clear();
+
+		// Util::deleteInVector(segment);
+		delete segment;
+		if(Util::isDna){
+			baseCount->clear();
+			delete baseCount;
+		}
+	}
+	//cerr << "~Chromosome() 2" << endl;
 }
 
 void Chromosome::readFasta() {
@@ -125,7 +182,51 @@ void Chromosome::readFasta() {
 	base = string("");
 
 	ifstream in(chromFile.c_str());
+	if (in.fail()) {
+		string msg("Cannot open ");
+		msg.append(chromFile);
+		msg.append(". System code is: ");
+		msg.append(Util::int2string(errno));
+		throw InvalidInputException(msg);
+	}
+
 	while (in.good()) {
+		string line;
+		getline(in, line);
+		if (line[0] == '>') {
+			if (!isFirst) {
+				string msg = "Chromosome file: ";
+				msg = msg + chromFile;
+				msg =
+						msg
+								+ " must have one sequence only. But it has more than one.";
+				throw InvalidInputException(msg);
+			} else {
+				header = line;
+				isFirst = false;
+			}
+		} else {
+			base.append(line);
+		}
+	}
+	in.close();
+}
+
+void Chromosome::readFasta(int maxLength) {
+	bool isFirst = true;
+	header = string("");
+	base = string("");
+
+	ifstream in(chromFile.c_str());
+	if (in.fail()) {
+		string msg("Cannot open ");
+		msg.append(chromFile);
+		msg.append(". System code is: ");
+		msg.append(Util::int2string(errno));
+		throw InvalidInputException(msg);
+	}
+
+	while (in.good() && base.size() < maxLength) {
 		string line;
 		getline(in, line);
 		if (line[0] == '>') {
@@ -159,20 +260,21 @@ void Chromosome::toUpperCase() {
 /**
  * Segment coordinates are inclusive [s,e]
  **/
-void Chromosome::removeN() {
+void Chromosome::removeAmbiguous() {
 	// Store non-N index
 	int start = -1;
+	char uncertainChar = Util::isDna? 'N' : 'X';
 	for (int i = 0; i < base.size(); i++) {
-		if (base[i] != 'N' && start == -1) {
+		if (base[i] != uncertainChar && start == -1) {
 			start = i;
-		} else if (base[i] == 'N' && start != -1) {
+		} else if (base[i] == uncertainChar && start != -1) {
 			vector<int> * v = new vector<int>();
 			v->push_back(start);
 			v->push_back(i - 1);
 			segment->push_back(v);
 
 			start = -1;
-		} else if (i == base.size() - 1 && base[i] != 'N' && start != -1) {
+		} else if (i == base.size() - 1 && base[i] != uncertainChar && start != -1) {
 			vector<int> * v = new vector<int>();
 			v->push_back(start);
 			v->push_back(i);
@@ -181,48 +283,73 @@ void Chromosome::removeN() {
 			start = -1;
 		}
 	}
+
+	// Test code
+	// for(auto seg : *segment){
+	// 	cerr << seg->at(0) << "-" << seg->at(1) << endl;
+	// }
 }
 
 /**
+ * Applied to DNA only--not proteins.
  * If the gap between two consecutive segments is less than 10 bp.
  * Segments that are shorter than 20 bp are not added.
  */
 void Chromosome::mergeSegments() {
-	vector<vector<int> *> * mSegment = new vector<vector<int> *>();
 
-	int s = segment->at(0)->at(0);
-	int e = segment->at(0)->at(1);
+	// cout << "Segment size is " << segment->size() << endl;
+	// cout << base << endl;
 
-	for (int i = 1; i < segment->size(); i++) {
-		int s1 = segment->at(i)->at(0);
-		int e1 = segment->at(i)->at(1);
+	if (segment->size() > 0) {
+		vector<vector<int> *> * mSegment = new vector<vector<int> *>();
+		int s = segment->at(0)->at(0);
+		int e = segment->at(0)->at(1);
 
-		if (s1 - e < 10) {
-			e = e1;
-		} else {
-			if (e - s + 1 >= 20) {
-				vector<int> * seg = new vector<int>();
-				seg->push_back(s);
-				seg->push_back(e);
-				mSegment->push_back(seg);
+		for (int i = 1; i < segment->size(); i++) {
+			int s1 = segment->at(i)->at(0);
+			int e1 = segment->at(i)->at(1);
+
+			/*
+			 if(e1 - s1 + 1 <= 2000){
+			 cout << "s1:" << s1 << " e1: " << e1 << endl;
+			 }
+			 */
+
+			if (s1 - e < 10) {
+				e = e1;
+			} else {
+				if (e - s + 1 >= 20) {
+					vector<int> * seg = new vector<int>();
+					seg->push_back(s);
+					seg->push_back(e);
+					mSegment->push_back(seg);
+				}
+
+				// Test start
+				/*
+				 if (e - s + 1 <= 100) {
+				 cout << "Removing: " << base.substr(s, e - s + 1) << endl;
+				 }
+				 */
+				// Test end
+				s = s1;
+				e = e1;
 			}
-
-			s = s1;
-			e = e1;
 		}
-	}
 
-	// Handle the last index
-	if (e - s + 1 >= 20) {
-		vector<int> * seg = new vector<int>();
-		seg->push_back(s);
-		seg->push_back(e);
-		mSegment->push_back(seg);
-	}
+		// Handle the last index
+		if (e - s + 1 >= 20) {
+			vector<int> * seg = new vector<int>();
+			seg->push_back(s);
+			seg->push_back(e);
+			mSegment->push_back(seg);
+		}
 
-	Util::deleteInVector(segment);
-	segment->clear();
-	segment = mSegment;
+		Util::deleteInVector(segment);
+		segment->clear();
+		delete segment;
+		segment = mSegment;
+	}
 }
 
 void Chromosome::makeSegmentList() {
@@ -261,14 +388,22 @@ const string* Chromosome::getBase() {
 	return &base;
 }
 
+string& Chromosome::getBaseRef() {
+	return base;
+}
+
+string& Chromosome::getHeaderRef() {
+	return header;
+}
+
 const vector<vector<int> *> * Chromosome::getSegment() {
 	return segment;
 }
 
-void Chromosome::printSegmentList(){
+void Chromosome::printSegmentList() {
 	int l = segment->size();
 	cout << "Segment list size = " << l << endl;
-	for(int i = 0; i < l; i++){
+	for (int i = 0; i < l; i++) {
 		cout << segment->at(i)->at(0) << "\t";
 		cout << segment->at(i)->at(1) << endl;
 	}
@@ -296,6 +431,11 @@ int Chromosome::getEffectiveSize() {
 }
 
 int Chromosome::getGcContent() {
+	if(!Util::isDna){
+		cerr << "Calculating GC content on a protein sequence is not allowed." << endl;
+		throw std::exception();
+	}
+
 	int gc = 0;
 	int size = base.size();
 	for (int i = 0; i < size; i++) {
@@ -305,4 +445,38 @@ int Chromosome::getGcContent() {
 		}
 	}
 	return gc;
+}
+
+void Chromosome::makeBaseCount() {
+	if(!Util::isDna){
+		cerr << "Counting nucleotides in a protein sequence is not allowed." << endl;
+		throw std::exception();
+	}
+
+	int size = base.size();
+	for (int i = 0; i < size; i++) {
+		switch (base.at(i)) {
+		case 'A':
+			baseCount->at(0)++;
+			break;
+;		case 'C':
+			baseCount->at(1)++;
+			break;
+		case 'G':
+			baseCount->at(2)++;
+			break;
+		case 'T':
+			baseCount->at(3)++;
+			break;
+		}
+	}
+}
+
+vector<int> * Chromosome::getBaseCount() {
+	if(!Util::isDna){
+		cerr << "Counting nucleotides in a protein sequence is not allowed." << endl;
+		throw std::exception();
+	}
+
+	return baseCount;
 }
