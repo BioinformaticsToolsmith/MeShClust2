@@ -93,7 +93,8 @@ set (HEADER_FILES
 
 set (CMAKE_CXX_COMPILER g++)
 set (CMAKE_CXX_STANDARD 11)
-set (CMAKE_CXX_FLAGS "-fopenmp -g -O3 -march=native")
+set (CMAKE_CXX_STANDARD_REQUIRED on)
+set (CMAKE_CXX_FLAGS "-fopenmp -g -O3 -march=native -std=c++11")
 
 target_compile_definitions(Cluster PRIVATE VERSION="2.3.0")
 target_compile_definitions(Fastcar PRIVATE VERSION="0.7.1")

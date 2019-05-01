@@ -140,7 +140,7 @@ void Feature<T>::normalize_cache(vector<double> &cache) const
 		double val = (cache[i] - mins[i]) / (maxs[i] - mins[i]);
 
 		// Hani Z. Girgis added this test
-		if(isnan(val)){
+		if(std::isnan(val)){
 			cerr << "Got NAN from max " << maxs[i] << " min " << mins[i] << endl;
 			throw std::exception();
 		}
@@ -252,13 +252,13 @@ void Feature<T>::normalize(const vector<pra<T> > &pairs)
 			throw std::exception();
 		}
 
-		if(isinf(maxs[i])){
+		if(std::isinf(maxs[i])){
 			cerr << "Error of feature: " << feat_names().at(i) << ". ";
 			cerr << "Maximum is " << maxs[i] << endl;
 			throw std::exception();
 		}
 
-		if(isinf(mins[i])){
+		if(std::isinf(mins[i])){
 			cerr << "Error of feature: " << feat_names().at(i) << ". ";
 			cerr << "Minimum is " << mins[i] << endl;
 			throw std::exception();
@@ -1913,7 +1913,7 @@ double Feature<T>::afd(Point<T>& a, Point<T>& b)
 
 		sum += unsquared * unsquared;
 
-		if(isinf(sum)){
+		if(std::isinf(sum)){
 			cerr << x << " " << y << " " << diff << " " << unsquared << endl;
 			throw std::exception();
 		}
