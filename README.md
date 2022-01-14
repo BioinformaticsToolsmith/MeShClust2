@@ -1,4 +1,9 @@
 ## MeShClust2
+
+The newest version of MeShClust (v3.0) can be obtained from https://github.com/BioinformaticsToolsmith/Identity.git
+
+This repository is no longer supported.
+
 Release version - 2.3.0
 
 ### Requirements
